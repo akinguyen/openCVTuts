@@ -9,10 +9,12 @@ def filterNoise(mask):
     closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
     return closing
 
+
 def filterImage(image):
-    
     return
-rubik = cv2.imread("images/rubik.jpg")
+
+
+rubik = cv2.imread("images/rubik_face.jpg")
 
 hsv = cv2.cvtColor(rubik, cv2.COLOR_BGR2HSV)
 
