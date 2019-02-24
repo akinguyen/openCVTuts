@@ -60,10 +60,14 @@ upper_blue = np.array([130, 255, 255])
 lower_green, upper_green = [(39, 80, 40), (90, 255, 255)]
 #lower_green, upper_green = getColorBound(0, 255, 0, 10, 50)
 # getColorBound(0, 2, 255, 50, 8)
-lower_red, upper_red = [(0, 90, 50), (8, 255, 255)]
+lower_red, upper_red = [(0, 100, 50), (8, 255, 255)]
 
-lower_white = np.array([80, 55, 100])
-upper_white = np.array([130, 79, 255])
+#lower_white = np.array([80, 55, 100])
+#upper_white = np.array([130, 79, 255])
+
+# pure white
+lower_white = np.array([0, 0, 0])
+upper_white = np.array([0, 0, 255])
 
 lower_orange, upper_orange = getColorBound(0, 165, 255, 12, 5)
 
