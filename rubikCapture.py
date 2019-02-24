@@ -7,7 +7,7 @@ print(cap.get(4))
 rectCoordinates = [(200, 200), (260, 200), (320, 200),
                    (200, 260), (260, 260), (320, 260),
                    (200, 320), (260, 320), (320, 320)]
-w, h = (27, 27)
+w, h = (26, 26)
 while True:
     ret, frame = cap.read()
     original = frame.copy()

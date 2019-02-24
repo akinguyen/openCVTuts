@@ -2,88 +2,64 @@ import cv2
 import numpy as np
 
 
-def filterNoise(mask):
-    kernel = np.ones((15, 15), np.uint8)/255
-    opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    kernel = np.ones((20, 20), np.uint8)/400
-    closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
-    return closing
+def filter(hsv, lower, upper, kernel1, kernel2):
+    # removing background noise
+    mask = cv2.inRange(hsv, lower, upper)
+    opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel1)
+    # removing inner noise inside object
+    return cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel2)
 
 
-def filterImage(image):
-    pink = np.uint8([[[147, 20, 255]]])
-    hsv_pink = cv2.cvtColor(pink, cv2.COLOR_BGR2HSV)
-    lower_pink = np.array([hsv_pink[0][0][0] - 10, 100, 100])
-    upper_pink = np.array([hsv_pink[0][0][0] + 5, 255, 255])
-    mask_pink = cv2.inRange(image, lower_pink, upper_pink)
-
-    contoursPink, h = cv2.findContours(
-        mask_pink, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    return
+def getColorBound(b, g, r, lowDiff, upperDiff):
+    color = np.uint8([[[b, g, r]]])
+    hsv_color = cv2.cvtColor(color, cv2.COLOR_BGR2HSV)
+    lower_color = np.array([hsv_color[0][0][0] - lowDiff, 100, 100])
+    upper_color = np.array([hsv_color[0][0][0] + upperDiff, 255, 255])
+    return lower_color, upper_color
 
 
+kernel1 = np.ones((15, 15), np.uint8)/255
+kernel2 = np.ones((20, 20), np.uint8)/400
 rubik = cv2.imread("images/rubikFilter.jpg")
-rubik_image = cv2.imread("images/rubikCapture.jpg")
+originalImage = cv2.imread("images/rubikCapture.jpg")
 
 hsv = cv2.cvtColor(rubik, cv2.COLOR_BGR2HSV)
-
-pink = np.uint8([[[147, 20, 255]]])
-hsv_pink = cv2.cvtColor(pink, cv2.COLOR_BGR2HSV)
-lower_pink = np.array([hsv_pink[0][0][0] - 1, 100, 100])
-upper_pink = np.array([hsv_pink[0][0][0] + 1, 255, 255])
-
-mask_pink = cv2.inRange(hsv, lower_pink, upper_pink)
-
-kernel = np.ones((15, 15), np.uint8)/255
-
-# removing background noise
-opening = cv2.morphologyEx(mask_pink, cv2.MORPH_OPEN, kernel)
-kernel = np.ones((20, 20), np.uint8)/400
-# removing inner noise inside object
-closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
-
+lower_pink, upper_pink = getColorBound(147, 29, 255, 1, 1)
+mask_pink = filter(hsv, lower_pink, upper_pink, kernel1, kernel2)
 contoursPink, h = cv2.findContours(
     mask_pink, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-rubik = cv2.bitwise_and(rubik_image, rubik_image, mask=closing)
+rubik = cv2.bitwise_and(originalImage, originalImage, mask=mask_pink)
 hsv = cv2.cvtColor(rubik, cv2.COLOR_BGR2HSV)
 
-# Create color boundaries
-lower_blue = np.array([120, 50, 50])
-upper_blue = np.array([160, 255, 255])
+lower_blue = np.array([90, 80, 55])
+upper_blue = np.array([130, 255, 255])
 
-lower_green = np.array([40, 150, 50])
-upper_green = np.array([100, 255, 180])
 
-lower_red = np.array([120, 100, 100])
-upper_red = np.array([255, 255, 255])
+lower_green, upper_green = [(39, 80, 40), (90, 255, 255)]
+#lower_green, upper_green = getColorBound(0, 255, 0, 10, 50)
+# getColorBound(0, 2, 255, 50, 8)
+lower_red, upper_red = [(0, 90, 50), (8, 255, 255)]
 
-lower_white = np.array([0, 0, 100])
-upper_white = np.array([0, 0, 255])
+lower_white, upper_white = [(80, 0, 100), (130, 79, 255)]
 
-orange = np.uint8([[[0, 165, 255]]])
-hsv_orange = cv2.cvtColor(orange, cv2.COLOR_BGR2HSV)
-lower_orange = np.array([hsv_orange[0][0][0] - 10, 100, 100])
-upper_orange = np.array([hsv_orange[0][0][0] + 5, 255, 255])
+lower_orange, upper_orange = getColorBound(0, 165, 255, 12, 5)
 
-lower_yellow = np.array([hsv_orange[0][0][0] - 5, 100, 100])
-upper_yellow = np.array([hsv_orange[0][0][0] + 10, 255, 255])
-
+lower_yellow, upper_yellow = getColorBound(0, 255, 255, 10, 10)
 
 # Create color mask
-mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
-mask_green = cv2.inRange(hsv, lower_green, upper_green)
-mask_orange = cv2.inRange(hsv, lower_orange, upper_orange)
-mask_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
-mask_red = cv2.inRange(hsv, lower_red, upper_red)
-mask_white = cv2.inRange(hsv, lower_white, upper_white)
+mask_blue = filter(hsv, lower_blue, upper_blue, kernel1, kernel2)
+mask_green = filter(hsv, lower_green, upper_green, kernel1, kernel2)
+mask_orange = filter(hsv, lower_orange, upper_orange, kernel1, kernel2)
+mask_yellow = filter(hsv, lower_yellow, upper_yellow, kernel1, kernel2)
+mask_red = filter(hsv, lower_red, upper_red, kernel1, kernel2)
+mask_white = filter(hsv, lower_white, upper_white, kernel1, kernel2)
 
 # Create color contours
 contoursBlue, h = cv2.findContours(
     mask_blue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-contoursgreen, h = cv2.findContours(
+contoursGreen, h = cv2.findContours(
     mask_green, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 contoursOrange, h = cv2.findContours(
@@ -105,8 +81,8 @@ for i in range(len(contoursBlue)):
     print("x = {0}, y = {1}".format(x, y))
 
 print("Green")
-for i in range(len(contoursgreen)):
-    x, y, w, h = cv2.boundingRect(contoursgreen[i])
+for i in range(len(contoursGreen)):
+    x, y, w, h = cv2.boundingRect(contoursGreen[i])
     cv2.rectangle(rubik, (x, y), (x+w, y+h), (0, 255, 0), 2)
     print("x = {0}, y = {1}".format(x, y))
 
@@ -136,7 +112,7 @@ for i in range(len(contoursWhite)):
 
 
 cv2.imshow('image', rubik)
-cv2.imshow('blue', mask_blue)
+cv2.imshow('blue', mask_orange)
 
 
 k = cv2.waitKey(0)

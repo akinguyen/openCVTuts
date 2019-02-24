@@ -53,17 +53,17 @@ def drawContours(color, contours):
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
 
-lower_blue = np.array([100, 120, 20])
+lower_blue = np.array([90, 80, 55])
 upper_blue = np.array([130, 255, 255])
 
 
 lower_green, upper_green = [(39, 80, 40), (90, 255, 255)]
 #lower_green, upper_green = getColorBound(0, 255, 0, 10, 50)
-# getColorBound(0, 0, 255, 10, 10)
-lower_red, upper_red = getColorBound(0, 2, 255, 50, 8)
+# getColorBound(0, 2, 255, 50, 8)
+lower_red, upper_red = [(0, 90, 50), (8, 255, 255)]
 
-lower_white = np.array([0, 0, 100])
-upper_white = np.array([0, 255, 255])
+lower_white = np.array([80, 55, 100])
+upper_white = np.array([130, 79, 255])
 
 lower_orange, upper_orange = getColorBound(0, 165, 255, 12, 5)
 
@@ -72,8 +72,13 @@ lower_yellow, upper_yellow = getColorBound(0, 255, 255, 10, 10)
 while True:
     ret, frame = cap.read()
     blur = cv2.GaussianBlur(frame, (19, 19), 0)
+    median = cv2.medianBlur(blur, 5)
     # Reducing noises
-    hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(median, cv2.COLOR_BGR2HSV)
+    hsv[:, :, 2] = np.multiply(hsv[:, :, 2], 0.60, casting='unsafe')
+    test = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+    cv2.imshow("test", test)
+    cv2.imshow("original", frame)
 
     # Create color mask
     mask_blue = filter(hsv, lower_blue, upper_blue, kernel1, kernel2)
@@ -108,7 +113,7 @@ while True:
     drawContours("yellow", contoursYellow)
     drawContours("red", contoursRed)
     drawContours("white", contoursWhite)
-    cv2.imshow('frame', frame)
+    cv2.imshow('detection', frame)
 
     cv2.imshow("closing", mask_red)
 
