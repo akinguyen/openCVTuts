@@ -11,10 +11,19 @@ def filterNoise(mask):
 
 
 def filterImage(image):
+    pink = np.uint8([[[147, 20, 255]]])
+    hsv_pink = cv2.cvtColor(pink, cv2.COLOR_BGR2HSV)
+    lower_pink = np.array([hsv_pink[0][0][0] - 10, 100, 100])
+    upper_pink = np.array([hsv_pink[0][0][0] + 5, 255, 255])
+    mask_pink = cv2.inRange(image, lower_pink, upper_pink)
+
+    contoursPink, h = cv2.findContours(
+        mask_pink, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
     return
 
 
-rubik = cv2.imread("images/rubik_face.jpg")
+rubik = cv2.imread("images/rubikCapture.jpg")
 
 hsv = cv2.cvtColor(rubik, cv2.COLOR_BGR2HSV)
 
@@ -103,8 +112,25 @@ for i in range(len(contoursWhite)):
     cv2.rectangle(rubik, (x, y), (x+w, y+h), (0, 255, 0), 2)
     print("x = {0}, y = {1}".format(x, y))
 
+pink = np.uint8([[[147, 20, 255]]])
+hsv_pink = cv2.cvtColor(pink, cv2.COLOR_BGR2HSV)
+lower_pink = np.array([hsv_pink[0][0][0] - 1, 100, 100])
+upper_pink = np.array([hsv_pink[0][0][0] + 1, 255, 255])
+mask_pink = cv2.inRange(hsv, lower_pink, upper_pink)
+
+kernel = np.ones((15, 15), np.uint8)/255
+
+# removing background noise
+opening = cv2.morphologyEx(mask_pink, cv2.MORPH_OPEN, kernel)
+kernel = np.ones((20, 20), np.uint8)/400
+# removing inner noise inside object
+closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+
+contoursPink, h = cv2.findContours(
+    mask_pink, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
 cv2.imshow('image', rubik)
-cv2.imshow('blue', mask_white)
+cv2.imshow('blue', closing)
 
 
 k = cv2.waitKey(0)

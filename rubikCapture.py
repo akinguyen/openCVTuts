@@ -12,7 +12,8 @@ while True:
                        (200, 320), (260, 320), (320, 320)]
 
     for coord in rectCoordinates:
-        cv2.rectangle(frame, coord, (coord[0]+w, coord[1]+h), (0, 255, 0), -1)
+        cv2.rectangle(
+            frame, coord, (coord[0]+w, coord[1]+h), (147, 20, 255), -1)
 
     cv2.imshow("video", frame)
     key = cv2.waitKey(1) & 0xFF
