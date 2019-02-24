@@ -58,9 +58,9 @@ upper_blue = np.array([130, 255, 255])
 
 
 lower_green, upper_green = [(39, 80, 40), (90, 255, 255)]
-
+#lower_green, upper_green = getColorBound(0, 255, 0, 10, 50)
 # getColorBound(0, 0, 255, 10, 10)
-lower_red, upper_red = [(0, 0, 20), (9, 255, 255)]
+lower_red, upper_red = getColorBound(0, 2, 255, 50, 8)
 
 lower_white = np.array([0, 0, 100])
 upper_white = np.array([0, 255, 255])
@@ -71,7 +71,9 @@ lower_yellow, upper_yellow = getColorBound(0, 255, 255, 10, 10)
 
 while True:
     ret, frame = cap.read()
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    blur = cv2.GaussianBlur(frame, (19, 19), 0)
+    # Reducing noises
+    hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
     # Create color mask
     mask_blue = filter(hsv, lower_blue, upper_blue, kernel1, kernel2)
@@ -104,7 +106,7 @@ while True:
     drawContours("orange", contoursOrange)
     drawContours("green", contoursGreen)
     drawContours("yellow", contoursYellow)
-    #drawContours("red", contoursRed)
+    drawContours("red", contoursRed)
     drawContours("white", contoursWhite)
     cv2.imshow('frame', frame)
 
