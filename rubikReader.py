@@ -23,13 +23,35 @@ def filterImage(image):
     return
 
 
-rubik = cv2.imread("images/rubikCapture.jpg")
+rubik = cv2.imread("images/rubikFilter.jpg")
+rubik_image = cv2.imread("images/rubikCapture.jpg")
 
 hsv = cv2.cvtColor(rubik, cv2.COLOR_BGR2HSV)
 
+pink = np.uint8([[[147, 20, 255]]])
+hsv_pink = cv2.cvtColor(pink, cv2.COLOR_BGR2HSV)
+lower_pink = np.array([hsv_pink[0][0][0] - 1, 100, 100])
+upper_pink = np.array([hsv_pink[0][0][0] + 1, 255, 255])
+
+mask_pink = cv2.inRange(hsv, lower_pink, upper_pink)
+
+kernel = np.ones((15, 15), np.uint8)/255
+
+# removing background noise
+opening = cv2.morphologyEx(mask_pink, cv2.MORPH_OPEN, kernel)
+kernel = np.ones((20, 20), np.uint8)/400
+# removing inner noise inside object
+closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+
+contoursPink, h = cv2.findContours(
+    mask_pink, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+rubik = cv2.bitwise_and(rubik_image, rubik_image, mask=closing)
+hsv = cv2.cvtColor(rubik, cv2.COLOR_BGR2HSV)
+
 # Create color boundaries
-lower_blue = np.array([100, 50, 50])
-upper_blue = np.array([130, 255, 255])
+lower_blue = np.array([120, 50, 50])
+upper_blue = np.array([160, 255, 255])
 
 lower_green = np.array([40, 150, 50])
 upper_green = np.array([100, 255, 180])
@@ -112,25 +134,9 @@ for i in range(len(contoursWhite)):
     cv2.rectangle(rubik, (x, y), (x+w, y+h), (0, 255, 0), 2)
     print("x = {0}, y = {1}".format(x, y))
 
-pink = np.uint8([[[147, 20, 255]]])
-hsv_pink = cv2.cvtColor(pink, cv2.COLOR_BGR2HSV)
-lower_pink = np.array([hsv_pink[0][0][0] - 1, 100, 100])
-upper_pink = np.array([hsv_pink[0][0][0] + 1, 255, 255])
-mask_pink = cv2.inRange(hsv, lower_pink, upper_pink)
-
-kernel = np.ones((15, 15), np.uint8)/255
-
-# removing background noise
-opening = cv2.morphologyEx(mask_pink, cv2.MORPH_OPEN, kernel)
-kernel = np.ones((20, 20), np.uint8)/400
-# removing inner noise inside object
-closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
-
-contoursPink, h = cv2.findContours(
-    mask_pink, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 cv2.imshow('image', rubik)
-cv2.imshow('blue', closing)
+cv2.imshow('blue', mask_blue)
 
 
 k = cv2.waitKey(0)
