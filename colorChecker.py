@@ -69,6 +69,9 @@ lower_orange, upper_orange = getColorBound(0, 165, 255, 12, 5)
 
 lower_yellow, upper_yellow = getColorBound(0, 255, 255, 10, 10)
 
+rectCoordinates = [(200, 200), (260, 200), (320, 200),
+                   (200, 260), (260, 260), (320, 260),
+                   (200, 320), (260, 320), (320, 320)]
 while True:
     ret, frame = cap.read()
     blur = cv2.GaussianBlur(frame, (19, 19), 0)
